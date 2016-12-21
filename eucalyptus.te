@@ -518,6 +518,8 @@ optional_policy(`
     domain_read_all_domains_state(eucalyptus_eucanetd_t)
     
     eucalyptus_dontaudit_leaks(dhcpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
+    
+    systemd_exec_systemctl(eucalyptus_eucanetd_t)
 ')
 
 optional_policy(`
