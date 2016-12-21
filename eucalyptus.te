@@ -503,6 +503,7 @@ optional_policy(`
     allow eucalyptus_eucanetd_t dhcpd_t:process sigkill;
 
     allow eucalyptus_eucanetd_t systemd_unit_file_t:service { start status stop };
+    allow eucalyptus_eucanetd_t systemd_systemctl_exec_t:file execute;
 
     ps_process_pattern(eucalyptus_eucanetd_t, dhcpd_t)
 
