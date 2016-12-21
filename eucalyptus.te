@@ -390,6 +390,10 @@ optional_policy(`
     ')
 
     read_files_pattern(eucalyptus_node_t, dhcpd_state_t, dhcp_etc_t)  # Edge NC gates instance launches on dhcp config
+
+    # https://eucalyptus.atlassian.net/browse/EUCA-12424
+    manage_files_pattern(eucalyptus_node_t, dhcpd_state_t, dhcpd_state_t)
+    filetrans_pattern(eucalyptus_node_t, dhcpd_state_t, dhcpd_state_t, file, "eucanetd_getstats_net.out")
 ')
 
 optional_policy(`
@@ -478,6 +482,7 @@ optional_policy(`
 
     apache_domtrans(eucalyptus_eucanetd_t)  # VPC metadata global process
     apache_signal(eucalyptus_eucanetd_t)  # VPC metadata
+    apache_systemctl(eucalyptus_eucanetd_t)  # VPC metadata global process
 
     eucalyptus_dontaudit_leaks(httpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
 ')
@@ -492,9 +497,12 @@ optional_policy(`
     gen_require(`
         type dhcp_etc_t;
         type dhcpd_state_t;
+        type systemd_unit_file_t;
     ')
 
     allow eucalyptus_eucanetd_t dhcpd_t:process sigkill;
+
+    allow eucalyptus_eucanetd_t systemd_unit_file_t:service { start status stop };
 
     ps_process_pattern(eucalyptus_eucanetd_t, dhcpd_t)
 
@@ -505,7 +513,10 @@ optional_policy(`
     filetrans_pattern(eucalyptus_eucanetd_t, dhcpd_state_t, dhcp_etc_t, file, "euca-dhcp.conf")
 
     dhcpd_domtrans(eucalyptus_eucanetd_t)
-
+    dhcpd_systemctl(eucalyptus_eucanetd_t)
+    
+    domain_read_all_domains_state(eucalyptus_eucanetd_t)
+    
     eucalyptus_dontaudit_leaks(dhcpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
 ')
 
@@ -540,4 +551,18 @@ optional_policy(`
     sysnet_domtrans_ifconfig(eucalyptus_eucanetd_t)  # ifconfig, ip
 
     eucalyptus_dontaudit_leaks(ifconfig_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
+')
+
+optional_policy(`
+    gen_require(`
+        type brctl_t;
+        type virt_image_t;
+    ')
+
+    allow brctl_t eucalyptus_var_lib_t:file read;
+    allow brctl_t eucalyptus_var_run_t:file write;
+    allow brctl_t virt_image_t:file { read write };
+
+    brctl_domtrans(eucalyptus_var_lib_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12424
+    brctl_domtrans(eucalyptus_var_run_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12424
 ')
