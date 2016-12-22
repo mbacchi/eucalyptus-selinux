@@ -12,7 +12,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-policy_module(eucalyptus, 0.1.16)
+policy_module(eucalyptus, 0.1.17)
 
 gen_require(`
     attribute fixed_disk_raw_read;
@@ -435,11 +435,11 @@ optional_policy(`
 # eucanetd local policy
 #
 
-allow eucalyptus_eucanetd_t self:capability { setgid setuid };
+allow eucalyptus_eucanetd_t self:capability { setgid setuid sys_resource };
 allow eucalyptus_eucanetd_t self:capability net_admin;  # vconfig in managed mode
 allow eucalyptus_eucanetd_t self:capability sys_admin;  # nsenter in VPCMIDO mode
 
-allow eucalyptus_eucanetd_t self:process { fork setpgid signal_perms };
+allow eucalyptus_eucanetd_t self:process { fork setpgid signal_perms setrlimit };
 
 allow eucalyptus_eucanetd_t self:fifo_file rw_fifo_file_perms;
 allow eucalyptus_eucanetd_t self:unix_stream_socket create_stream_socket_perms;
@@ -458,6 +458,9 @@ files_pid_filetrans(eucalyptus_eucanetd_t, eucalyptus_var_run_t, file)
 manage_files_pattern(eucalyptus_eucanetd_t, eucalyptus_tmp_t, eucalyptus_tmp_t)
 files_tmp_filetrans(eucalyptus_eucanetd_t, eucalyptus_tmp_t, { dir file })
 
+manage_files_pattern(eucalyptus_eucanetd_t, tmpfs_t, eucalyptus_tmpfs_t)
+fs_tmpfs_filetrans(eucalyptus_eucanetd_t, eucalyptus_tmpfs_t, { dir file lnk_file sock_file fifo_file })
+
 kernel_read_network_state(eucalyptus_eucanetd_t)  # vconfig in managed mode
 kernel_read_system_state(eucalyptus_eucanetd_t)
 
@@ -468,6 +471,8 @@ corenet_udp_bind_generic_port(eucalyptus_eucanetd_t)
 corenet_tcp_connect_http_cache_port(eucalyptus_eucanetd_t)  # port 8080, midonet-api
 
 dev_read_sysfs(eucalyptus_eucanetd_t)
+
+fs_getattr_tmpfs(eucalyptus_eucanetd_t)
 
 auth_read_passwd(eucalyptus_eucanetd_t)
 
@@ -497,13 +502,9 @@ optional_policy(`
     gen_require(`
         type dhcp_etc_t;
         type dhcpd_state_t;
-        type systemd_unit_file_t;
     ')
 
     allow eucalyptus_eucanetd_t dhcpd_t:process sigkill;
-
-    allow eucalyptus_eucanetd_t systemd_unit_file_t:service { start status stop };
-    allow eucalyptus_eucanetd_t systemd_systemctl_exec_t:file execute;
 
     ps_process_pattern(eucalyptus_eucanetd_t, dhcpd_t)
 
@@ -516,11 +517,7 @@ optional_policy(`
     dhcpd_domtrans(eucalyptus_eucanetd_t)
     dhcpd_systemctl(eucalyptus_eucanetd_t)
     
-    domain_read_all_domains_state(eucalyptus_eucanetd_t)
-    
     eucalyptus_dontaudit_leaks(dhcpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
-    
-    systemd_exec_systemctl(eucalyptus_eucanetd_t)
 ')
 
 optional_policy(`
@@ -568,4 +565,25 @@ optional_policy(`
 
     brctl_domtrans(eucalyptus_var_lib_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12424
     brctl_domtrans(eucalyptus_var_run_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12424
+')
+
+optional_policy(`
+    gen_require(`
+      type systemd_unit_file_t;
+    ')
+    
+    allow eucalyptus_eucanetd_t systemd_unit_file_t:service { start status stop };
+    allow eucalyptus_eucanetd_t systemd_systemctl_exec_t:file execute;
+
+    domain_read_all_domains_state(eucalyptus_eucanetd_t)
+
+    systemd_exec_systemctl(eucalyptus_eucanetd_t)
+')
+
+optional_policy(`
+    gen_require(`
+      type syslogd_var_run_t;
+    ')
+
+    logging_read_syslog_pid(eucalyptus_eucanetd_t)
 ')
