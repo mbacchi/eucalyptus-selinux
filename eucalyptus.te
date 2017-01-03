@@ -582,6 +582,15 @@ optional_policy(`
 
 optional_policy(`
     gen_require(`
+      type systemd_sysctl_t;
+      type systemd_systemctl_exec_t;
+    ')
+
+    systemd_domtrans_sysctl(eucalyptus_eucanetd_t)
+')
+
+optional_policy(`
+    gen_require(`
       type syslogd_var_run_t;
     ')
 
