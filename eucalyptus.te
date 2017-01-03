@@ -596,3 +596,11 @@ optional_policy(`
 
     logging_read_syslog_pid(eucalyptus_eucanetd_t)
 ')
+
+optional_policy(`
+    gen_require(`
+      type intermapper_port_t;
+    ')
+
+    corenet_tcp_connect_intermapper_port(eucalyptus_eucanetd_t)
+')
