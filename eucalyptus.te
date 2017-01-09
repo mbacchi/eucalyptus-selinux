@@ -479,6 +479,7 @@ optional_policy(`
 
     apache_domtrans(eucalyptus_eucanetd_t)  # VPC metadata global process
     apache_signal(eucalyptus_eucanetd_t)  # VPC metadata
+    apache_systemctl(eucalyptus_eucanetd_t)
 
     eucalyptus_dontaudit_leaks(httpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
 ')
@@ -506,6 +507,7 @@ optional_policy(`
     filetrans_pattern(eucalyptus_eucanetd_t, dhcpd_state_t, dhcp_etc_t, file, "euca-dhcp.conf")
 
     dhcpd_domtrans(eucalyptus_eucanetd_t)
+    dhcpd_systemctl(eucalyptus_eucanetd_t)
 
     eucalyptus_dontaudit_leaks(dhcpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
 ')
@@ -541,22 +543,4 @@ optional_policy(`
     sysnet_domtrans_ifconfig(eucalyptus_eucanetd_t)  # ifconfig, ip
 
     eucalyptus_dontaudit_leaks(ifconfig_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
-')
-
-optional_policy(`
-    gen_require(`
-      type dhcpd_unit_file_t;
-      type dhcpd_t;
-    ')
-
-    dhcpd_systemctl(eucalyptus_eucanetd_t)
-')
-
-optional_policy(`
-    gen_require(`
-      type httpd_t;
-      type httpd_unit_file_t;
-    ')
-
-    apache_systemctl(eucalyptus_eucanetd_t)
 ')
