@@ -545,8 +545,18 @@ optional_policy(`
 
 optional_policy(`
     gen_require(`
-        type systemd_systemctl_exec_t;
+      type dhcpd_unit_file_t;
+      type dhcpd_t;
     ')
 
-    systemd_exec_systemctl(eucalyptus_eucanetd_t)
+    dhcpd_systemctl(eucalyptus_eucanetd_t)
+')
+
+optional_policy(`
+    gen_require(`
+      type httpd_t;
+      type httpd_unit_file_t;
+    ')
+
+    apache_systemctl(eucalyptus_eucanetd_t)
 ')
