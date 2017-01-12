@@ -435,6 +435,7 @@ optional_policy(`
 allow eucalyptus_eucanetd_t self:capability { setgid setuid };
 allow eucalyptus_eucanetd_t self:capability net_admin;  # vconfig in managed mode
 allow eucalyptus_eucanetd_t self:capability sys_admin;  # nsenter in VPCMIDO mode
+dontaudit eucalyptus_eucanetd_t self:capability sys_resource;  # ignore eucanetd setting resource limits
 
 allow eucalyptus_eucanetd_t self:process { fork setpgid signal_perms };
 
