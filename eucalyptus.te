@@ -390,7 +390,8 @@ optional_policy(`
     ')
 
     read_files_pattern(eucalyptus_node_t, dhcpd_state_t, dhcp_etc_t)  # Edge NC gates instance launches on dhcp config
-    manage_files_pattern(eucalyptus_node_t, dhcpd_state_t, dhcpd_state_t)  # allow NC to access external net stats (eucanetd_getstats_net.out)
+    read_files_pattern(eucalyptus_node_t, dhcpd_state_t, dhcpd_state_t)  # allow NC to access external net stats (eucanetd_getstats_net.out)
+    write_files_pattern(eucalyptus_node_t, dhcpd_state_t, dhcpd_state_t)  # allow NC to access external net stats (eucanetd_getstats_net.out)
 ')
 
 optional_policy(`
@@ -507,8 +508,6 @@ optional_policy(`
     filetrans_pattern(eucalyptus_eucanetd_t, dhcpd_state_t, dhcp_etc_t, file, "euca-dhcp.conf")
 
     dhcpd_systemctl(eucalyptus_eucanetd_t)
-
-    corenet_udp_bind_bgp_port(dhcpd_t)  # Allow Eucalyptus dhcp to bind to bgp port
 
     eucalyptus_dontaudit_leaks(dhcpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
 ')
