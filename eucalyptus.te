@@ -509,8 +509,6 @@ optional_policy(`
 
     dhcpd_systemctl(eucalyptus_eucanetd_t)
 
-    corenet_udp_bind_bgp_port(dhcpd_t)  # Allow Eucalyptus dhcp to bind to bgp port
-
     eucalyptus_dontaudit_leaks(dhcpd_t)  # https://eucalyptus.atlassian.net/browse/EUCA-12084
 ')
 
